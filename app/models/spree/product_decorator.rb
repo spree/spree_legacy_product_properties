@@ -9,19 +9,57 @@ module Spree
       }
 
       base.whitelisted_ransackable_associations |= %w[properties]
+
+      # Property scopes
+      base.add_search_scope :with_property do |property|
+        joins(:properties).where(Spree::Product.property_conditions(property))
+      end
+
+      base.add_search_scope :with_property_value do |property, value|
+        if Spree.use_translations?
+          joins(:properties).
+            join_translation_table(Spree::Property).
+            join_translation_table(Spree::ProductProperty).
+            where(Spree::ProductProperty.translation_table_alias => { value: value }).
+            where(Spree::Product.property_conditions(property))
+        else
+          joins(:properties).
+            where(Spree::ProductProperty.table_name => { value: value }).
+            where(Spree::Product.property_conditions(property))
+        end
+      end
+
+      base.add_search_scope :with_property_values do |property_filter_param, property_values|
+        joins(product_properties: :property).
+          where(Spree::Property.table_name => { filter_param: property_filter_param }).
+          where(Spree::ProductProperty.table_name => { filter_param: property_values.map(&:parameterize) })
+      end
+    end
+
+    def self.property_conditions(property)
+      properties_table = Spree::Property.table_name
+
+      case property
+      when Spree::Property then { "#{properties_table}.id" => property.id }
+      when Integer then { "#{properties_table}.id" => property }
+      else
+        if Spree::Property.column_for_attribute('id').type == :uuid
+          ["#{properties_table}.name = ? OR #{properties_table}.id = ?", property, property]
+        else
+          { "#{properties_table}.name" => property }
+        end
+      end
     end
 
     def property(property_name)
-      Spree::Deprecation.warn("Product properties are deprecated and will be removed in Spree 6.0. Please use Metafields instead")
       if product_properties.loaded?
-        product_properties.detect { |property| property.property.name == property_name }.try(:value)
+        product_properties.detect { |pp| pp.property.name == property_name }.try(:value)
       else
         product_properties.joins(:property).find_by(spree_properties: { name: property_name }).try(:value)
       end
     end
 
     def set_property(property_name, property_value, property_presentation = property_name)
-      Spree::Deprecation.warn("Product properties are deprecated and will be removed in Spree 6.0. Please use Metafields instead")
       property_name = property_name.to_s.parameterize
       ApplicationRecord.transaction do
         prop = if Spree::Property.where(name: property_name).exists?
@@ -45,7 +83,6 @@ module Spree
     end
 
     def remove_property(property_name)
-      Spree::Deprecation.warn("Product properties are deprecated and will be removed in Spree 6.0. Please use Metafields instead")
       product_properties.joins(:property).find_by(spree_properties: { name: property_name.parameterize })&.destroy
     end
 

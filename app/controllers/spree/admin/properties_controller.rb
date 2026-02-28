@@ -19,7 +19,7 @@ module Spree
       end
 
       def permitted_resource_params
-        params.require(:property).permit(permitted_property_attributes)
+        params.require(:property).permit(:name, :presentation, :position, :kind, :display_on)
       end
     end
   end

@@ -1,3 +1,4 @@
+<% if Spree::Config[:product_properties_enabled] %>
 <div class="card mb-6">
   <div class="card-header flex items-center justify-between">
     <h5 class="card-title"><%= Spree.t(:properties) %></h5>
@@ -44,3 +45,4 @@
     </table>
   </div>
 </div>
+<% end %>

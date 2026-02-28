@@ -12,18 +12,13 @@ module SpreeLegacyProductProperties
       SpreeLegacyProductProperties::Config = SpreeLegacyProductProperties::Configuration.new
     end
 
-    initializer 'spree_legacy_product_properties.preferences', before: :load_config_initializers do
-      Spree::AppConfiguration.preference :product_properties_enabled, :boolean, default: false
+    def self.activate
+      Dir.glob(File.join(File.dirname(__FILE__), '../../app/**/*_decorator*.rb')) do |c|
+        Rails.configuration.cache_classes ? require(c) : load(c)
+      end
     end
 
-    config.to_prepare do
-      Dir.glob(File.join(File.dirname(__FILE__), '../../app/models/spree/*_decorator*.rb')) do |c|
-        require_dependency(c)
-      end
-      Dir.glob(File.join(File.dirname(__FILE__), '../../app/models/spree/**/*_decorator*.rb')) do |c|
-        require_dependency(c)
-      end
-    end
+    config.to_prepare(&method(:activate).to_proc)
 
     initializer 'spree_legacy_product_properties.assets' do |app|
       if app.config.respond_to?(:assets)
