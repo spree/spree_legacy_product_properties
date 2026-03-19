@@ -41,12 +41,12 @@ Rails.application.config.after_initialize do
   end
 
   # Register product form partial for properties
-  if defined?(Spree::Admin)
+  if defined?(Spree::Admin) && Rails.application.config.respond_to?(:spree_admin)
     Rails.application.config.spree_admin.product_form_partials << 'spree/admin/products/form/properties'
   end
 
   # Register admin navigation
-  if defined?(Spree::Admin)
+  if defined?(Spree::Admin) && Spree.respond_to?(:admin)
     sidebar_nav = Spree.admin.navigation.sidebar
 
     products_item = sidebar_nav.find(:products)
