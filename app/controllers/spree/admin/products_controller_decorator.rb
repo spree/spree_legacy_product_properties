@@ -21,4 +21,6 @@ module Spree
   end
 end
 
-Spree::Admin::ProductsController.prepend(Spree::Admin::ProductsControllerDecorator)
+if defined?(Spree::Admin::ProductsController)
+  Spree::Admin::ProductsController.prepend(Spree::Admin::ProductsControllerDecorator)
+end

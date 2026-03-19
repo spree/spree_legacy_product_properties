@@ -19,19 +19,5 @@ module SpreeLegacyProductProperties
     end
 
     config.to_prepare(&method(:activate).to_proc)
-
-    initializer 'spree_legacy_product_properties.assets' do |app|
-      if app.config.respond_to?(:assets)
-        app.config.assets.paths << root.join('app/javascript')
-        app.config.assets.precompile += %w[spree_legacy_product_properties_manifest]
-      end
-    end
-
-    initializer 'spree_legacy_product_properties.importmap', before: 'importmap' do |app|
-      if app.config.respond_to?(:importmap)
-        app.config.importmap.paths << root.join('config/importmap.rb')
-        app.config.importmap.cache_sweepers << root.join('app/javascript')
-      end
-    end
   end
 end
