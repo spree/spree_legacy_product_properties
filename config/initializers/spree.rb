@@ -22,10 +22,10 @@ Rails.application.config.after_initialize do
 
     # Re-delegate the new attributes
     Spree::Core::ControllerHelpers::StrongParameters.delegate(
-      :permitted_product_properties_attributes,
-      :permitted_property_attributes,
+      :product_properties_attributes,
+      :property_attributes,
       to: :permitted_attributes,
-      prefix: false
+      prefix: :permitted
     )
   end
 
